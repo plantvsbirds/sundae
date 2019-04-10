@@ -7,13 +7,15 @@
   hi, share a scoop of your sundae with your homie!
   <input name="site" type="url" value="http://" />
   <button id="submit-share">Share now</button>
+  <button id="submit-done">Done!</button>
 </body>
 
 <script type="text/javascript">
-  function postData(url = ``, data = {}) {
+  let ins
+  function postData(url = ``, data = {}, method) {
     // Default options are marked with *
       return fetch(url, {
-          method: "POST", // *GET, POST, PUT, DELETE, etc.
+          method: method || "POST", // *GET, POST, PUT, DELETE, etc.
           mode: "cors", // no-cors, cors, *same-origin
           cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
           credentials: "same-origin", // include, *same-origin, omit
@@ -25,16 +27,24 @@
           referrer: "no-referrer", // no-referrer, *client
           body: JSON.stringify(data), // body data type must match "Content-Type" header
       })
-      .then(response => response.status)
   }
   let apiRoot = document.URL
   let requestShare = ({ url }) => {
     postData(apiRoot, {
       url
+    }).then((res) => res.json()).then((_ins) => {
+      ins = _ins
+      console.log(ins)
     })
+  }
+  let requestDone = () => {
+    postData(apiRoot, ins, "DELETE").then((res) => res.json())
   }
   document.querySelector("#submit-share").addEventListener('click', () => {
     requestShare({ url: document.querySelector("[name=site]").value })
+  })
+  document.querySelector("#submit-done").addEventListener('click', () => {
+    requestDone()
   })
 </script>
 </html>
