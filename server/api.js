@@ -10,6 +10,9 @@ const outerAppLongPoll = require("express-longpoll")(outerApp)
 
 const uuid = require('uuid/v1')
 
+const Dockerode = require('dockerode')
+const docker = new Dockerode()
+
 const cookieStore = {}
 const instanceStages = [
   'CREATE',
@@ -33,6 +36,27 @@ innerApp.post('/cookie-report', (req, res, next) => {
 
 innerApp.listen(12345, '127.0.0.1')
 
+const startDockerSession = ({ id }) => {
+  docker.createContainer({
+    Image: 'consol/centos-xfce-vnc',
+    // Cmd: []
+    name: id,
+    Env: ["ID=" + id, "env=docker"],
+    ExposedPorts: {
+      "6901/tcp": {},
+      "6901/udp": {},
+      "5901/tcp": {},
+    },
+    Tty: true,
+  })
+  .then((container) => {
+    return container.start()
+  })
+  .then((dat) => {
+    console.log(dat)
+  })
+  .catch(err => console.log(err))
+}
 const pub = (ins) => 
     outerAppLongPoll.publish('/' + ins.id, ins)
 const createInstance = ({ payload }) => {
@@ -46,6 +70,7 @@ const createInstance = ({ payload }) => {
   ins.poll = setInterval(() => {
     pub(ins)
   }, 1000)
+  ins.dockerContainer = startDockerSession(ins)
   return {id: ins.id}
 }
 const killInstance = ({ payload: { id } }) => {
