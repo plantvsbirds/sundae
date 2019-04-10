@@ -19,15 +19,20 @@
   </style>
 </head>
 <body>
-  <main>
-    hi, share a scoop of your sundae with your homie!
+  <main id="begin">
+    <h1>hi, </h1><br />share a scoop of your sundae with your homie!
     <input name="site" type="url" value="http://" />
     <button id="submit-share">Share now</button>
+    <button id="submit-done">Done!</button>
+  </main>
+  <main id="bye">
     <button id="submit-done">Done!</button>
   </main>
 </body>
 
 <script type="text/javascript">
+  let states = ['begin', 'sharing', 'bye']
+  let state = states[0]
   let ins
   function postData(url = ``, data = {}, method) {
     // Default options are marked with *
