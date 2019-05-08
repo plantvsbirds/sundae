@@ -14,15 +14,36 @@
 
       font-family: -apple-system;
       background: #fafafa;
+
+      display: none;
+    }
+    .cap-width {
+      max-width: 400px;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
   <main id="begin">
-    <h1>hi, </h1><br />share a scoop of your sundae with your homie!
-    <input name="site" type="url" value="http://" />
-    <button id="submit-share">Share now</button>
-    <button id="submit-done">Done!</button>
+    <div class="cap-width">
+      <h1>hi, </h1><br />share a scoop of web with your homie!
+      <br />
+      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
+      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
+      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
+      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
+      <button data-action="submit-share-preset" data-url="hahhaa.com">Echo360.org</button>
+      <br />
+      Share custom: <input name="site" type="url" value="http://" />
+      <button id="submit-share">Go</button>
+
+
+      <br/>
+      <button id="submit-done">Done!</button>
+    </div>
+  </main>
+  <main id="loading">
+    Seriously loading
   </main>
   <main id="bye">
     <button id="submit-done">Done!</button>
@@ -30,9 +51,14 @@
 </body>
 
 <script type="text/javascript">
-  let states = ['begin', 'sharing', 'bye']
+  let states = ['begin', 'sharing', 'bye', 'loading']
   let state = states[0]
   let ins
+  let switchToState = (newState) => {
+    document.querySelector(`#${state}`).style.display = 'none'
+    state = newState
+    document.querySelector(`#${state}`).style.display = 'block'
+  }
   function postData(url = ``, data = {}, method) {
     // Default options are marked with *
       return fetch(url, {
@@ -62,10 +88,12 @@
     postData(apiRoot, ins, "DELETE").then((res) => res.json())
   }
   document.querySelector("#submit-share").addEventListener('click', () => {
+    switchToState("loading")
     requestShare({ url: document.querySelector("[name=site]").value })
   })
   document.querySelector("#submit-done").addEventListener('click', () => {
     requestDone()
   })
+  switchToState("begin")
 </script>
 </html>
