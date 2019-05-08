@@ -2,12 +2,15 @@
   "name": "sundae-server",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "aluba lin",
+  "author": "aluba lu",
   "license": "UNLICENSED",
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "express-longpoll": "^0.0.4",
     "uuid": "^3.3.2"
+  },
+  "scripts": {
+    "dev": "sudo nodemon api.js"
   }
 }
