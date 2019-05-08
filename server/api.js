@@ -34,19 +34,15 @@ innerApp.post('/cookie-report', (req, res, next) => {
   next()
 })
 
-innerApp.listen(12345, '127.0.0.1')
+innerApp.listen(8081, '127.0.0.1')
 
 const startDockerSession = ({ id }) => {
-  docker.createContainer({
-    Image: 'consol/centos-xfce-vnc',
+  return docker.createContainer({
+    Image: 'aa',
     // Cmd: []
     name: id,
     Env: ["ID=" + id, "env=docker"],
-    ExposedPorts: {
-      "6901/tcp": {},
-      "6901/udp": {},
-      "5901/tcp": {},
-    },
+    PublishAllPorts: true,
     Tty: true,
   })
   .then((container) => {
@@ -54,6 +50,7 @@ const startDockerSession = ({ id }) => {
   })
   .then((dat) => {
     console.log(dat)
+    return Promise.resolve({ id })
   })
   .catch(err => console.log(err))
 }
@@ -70,8 +67,7 @@ const createInstance = ({ payload }) => {
   ins.poll = setInterval(() => {
     pub(ins)
   }, 1000)
-  ins.dockerContainer = startDockerSession(ins)
-  return {id: ins.id}
+  return startDockerSession(ins)
 }
 const killInstance = ({ payload: { id } }) => {
   let ins = instances.find((i) => i.id == id)
@@ -89,11 +85,11 @@ outerApp.get('/share', (req, res, next) => {
 })
 
 outerApp.post('/share', (req, res, next) => {
-  res.json(createInstance({ payload: req.body }))
+  createInstance({ payload: req.body }).then((d) => res.json(d))
 })
 outerApp.delete('/share', (req, res, next) => {
   res.json(killInstance({ payload: req.body }))
 })
 
 
-outerApp.listen(80)
+outerApp.listen(8080)
