@@ -21,6 +21,7 @@ const instanceStages = [
   'DEAD'
 ]
 let instances = []
+let getInsById = (id) => instances.find((i) => i.id == id)
 
 innerApp.get('/ping', (req, res, next) => {
   res.json({'pong': true})
@@ -40,12 +41,15 @@ const startDockerSession = ({ id }) => {
   return docker.createContainer({
     Image: 'aa',
     // Cmd: []
-    name: id,
+    ID: id,
     Env: ["ID=" + id, "env=docker"],
     PublishAllPorts: true,
-    Tty: true,
+    // Tty: true,
+    Detach: true,
   })
   .then((container) => {
+    // getInsById(id).container = container
+    // console.log(container)
     return container.start()
   })
   .then((dat) => {
@@ -70,7 +74,7 @@ const createInstance = ({ payload }) => {
   return startDockerSession(ins)
 }
 const killInstance = ({ payload: { id } }) => {
-  let ins = instances.find((i) => i.id == id)
+  let ins = getInsById(id)
   ins.stage = 'KILLING'
 
   pub(ins)
