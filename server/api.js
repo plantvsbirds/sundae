@@ -22,6 +22,8 @@ const instanceStages = [
 ]
 let instances = []
 let getInsById = (id) => instances.find((i) => i.id == id)
+let getInsByCid = (id) => instances.find((i) => i.cid == id)
+let dockerOpsErrHandler = err => console.log(err)
 
 innerApp.get('/ping', (req, res, next) => {
   res.json({'pong': true})
@@ -41,7 +43,6 @@ const startDockerSession = ({ id }) => {
   return docker.createContainer({
     Image: 'aa',
     // Cmd: []
-    ID: id,
     Env: ["ID=" + id, "env=docker"],
     PublishAllPorts: true,
     // Tty: true,
@@ -49,17 +50,33 @@ const startDockerSession = ({ id }) => {
   })
   .then((container) => {
     // getInsById(id).container = container
-    // console.log(container)
+    getInsById(id).cid = container.id
     return container.start()
   })
   .then((dat) => {
     console.log(dat)
     return Promise.resolve({ id })
   })
-  .catch(err => console.log(err))
+  .catch(dockerOpsErrHandler)
 }
-const pub = (ins) => 
-    outerAppLongPoll.publish('/' + ins.id, ins)
+
+const instanceStatusUpdateInterval = setInterval(() => {
+  docker.listContainers({
+    all: false,
+  }).then((containers) => {
+    containers.filter(({ Ports, Id }) => {
+      let ins = getInsByCid(Id)
+      if (!ins)
+        return
+      else {
+        ins.ports = Ports
+        ins.publicPort = Ports.find(p => p.PrivatePort == 6901).PublicPort
+      }
+    })
+  })
+  .catch(dockerOpsErrHandler)
+}, 500)
+
 const createInstance = ({ payload }) => {
   let ins = {
     ...payload,
@@ -70,7 +87,7 @@ const createInstance = ({ payload }) => {
   outerAppLongPoll.create('/' + ins.id, {})
   ins.poll = setInterval(() => {
     pub(ins)
-  }, 1000)
+  }, 500)
   return startDockerSession(ins)
 }
 const killInstance = ({ payload: { id } }) => {
@@ -83,6 +100,10 @@ const killInstance = ({ payload: { id } }) => {
   }, 60 * 1000)
   return {id: ins.id}
 }
+
+const pub = (ins) => 
+    outerAppLongPoll.publish('/' + ins.id, ins)
+
 // outerApp.use(express.static(__dirname + '/static'));
 outerApp.get('/share', (req, res, next) => {
   res.sendFile('./static/share.html', {root: '.'})
