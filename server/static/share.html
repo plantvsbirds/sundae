@@ -54,12 +54,13 @@
   let states = ['begin', 'sharing', 'bye', 'loading']
   let state = states[0]
   let ins
+  let insPollInterval
   let switchToState = (newState) => {
     document.querySelector(`#${state}`).style.display = 'none'
     state = newState
     document.querySelector(`#${state}`).style.display = 'block'
   }
-  function postData(url = ``, data = {}, method) {
+  function postData(url = ``, data, method) {
     // Default options are marked with *
       return fetch(url, {
           method: method || "POST", // *GET, POST, PUT, DELETE, etc.
@@ -72,20 +73,29 @@
           },
           redirect: "follow", // manual, *follow, error
           referrer: "no-referrer", // no-referrer, *client
-          body: JSON.stringify(data), // body data type must match "Content-Type" header
-      })
+          body: data && JSON.stringify(data), // body data type must match "Content-Type" header
+      }).then(b => b.json())
   }
   let apiRoot = document.URL
+  let insRoot = location.origin
+  let requestInstance = () => {
+    console.log([insRoot, ins.id].join('/'))
+    return postData([insRoot, ins.id].join('/'), undefined, "GET")
+  }
   let requestShare = ({ url }) => {
     postData(apiRoot, {
       url
-    }).then((res) => res.json()).then((_ins) => {
+    }).then((_ins) => {
       ins = _ins
-      console.log(ins)
+      insPollInterval = setInterval(() => {
+        requestInstance().then(d => {
+          console.log(d)
+        })
+      }, 500)
     })
   }
   let requestDone = () => {
-    postData(apiRoot, ins, "DELETE").then((res) => res.json())
+    return postData(apiRoot, ins, "DELETE")
   }
   document.querySelector("#submit-share").addEventListener('click', () => {
     switchToState("loading")
