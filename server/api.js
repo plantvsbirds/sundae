@@ -45,8 +45,8 @@ const startDockerSession = ({ id }) => {
     // Cmd: []
     Env: ["ID=" + id, "env=docker"],
     PublishAllPorts: true,
-    // Tty: true,
-    Detach: true,
+    Tty: true,
+    // Detach: true,
   })
   .then((container) => {
     // getInsById(id).container = container
@@ -104,7 +104,7 @@ const killInstance = ({ payload: { id } }) => {
 const pub = (ins) => 
     outerAppLongPoll.publish('/' + ins.id, ins)
 
-// outerApp.use(express.static(__dirname + '/static'));
+outerApp.use(express.static('static'));
 outerApp.get('/share', (req, res, next) => {
   res.sendFile('./static/share.html', {root: '.'})
 })
