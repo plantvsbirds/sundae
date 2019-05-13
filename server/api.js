@@ -1,6 +1,8 @@
 const express = require('express')
 const innerApp = express()
+const innerAppPort = 8081
 const outerApp = express()
+const outerAppPort = 8080
 
 const expressBodyParser = require('body-parser')
 innerApp.use(expressBodyParser.json())
@@ -37,13 +39,13 @@ innerApp.post('/cookie-report', (req, res, next) => {
   next()
 })
 
-innerApp.listen(8081, '127.0.0.1')
+innerApp.listen(innerAppPort, '127.0.0.1')
 
-const startDockerSession = ({ id }) => {
+const startDockerSession = ({ id, url }) => {
   return docker.createContainer({
     Image: 'aa',
     // Cmd: []
-    Env: ["ID=" + id, "env=docker"],
+    Env: ["ID=" + id, "env=docker", `host=host.docker.internal:${innerAppPort}`, `target=${url}`],
     PublishAllPorts: true,
     Tty: true,
     // Detach: true,
@@ -97,7 +99,7 @@ const killInstance = ({ payload: { id } }) => {
   pub(ins)
   setTimeout(() => {
     clearInterval(ins.poll)
-  }, 60 * 1000)
+  }, 60 * 1000) 
   return {id: ins.id}
 }
 
@@ -112,9 +114,9 @@ outerApp.get('/share', (req, res, next) => {
 outerApp.post('/share', (req, res, next) => {
   createInstance({ payload: req.body }).then((d) => res.json(d))
 })
+
 outerApp.delete('/share', (req, res, next) => {
   res.json(killInstance({ payload: req.body }))
 })
 
-
-outerApp.listen(8080)
+outerApp.listen(outerAppPort)
