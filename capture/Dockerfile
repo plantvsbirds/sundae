@@ -1,6 +1,11 @@
-FROM consol/centos-xfce-vnc
+FROM sundae-env
+USER 0
 
-# todo: copy electron
-ADD ./docker /sundae
+ADD ./ /sundae/sundae-capture-new/
+RUN rm -rf /sundae/sundae-capture-new/node_modules
+RUN mv /sundae/sundae-capture/node_modules /sundae/sundae-capture-new
+RUN rm -rf /sundae/sundae-capture/
+RUN mv /sundae/sundae-capture-new/ /sundae/sundae-capture/
 
-ENTRYPOINT ["/dockerstartup/vnc_startup.sh", "/sundae/start.sh"]
+#, "/sundae/start.sh"]
+USER 1000
