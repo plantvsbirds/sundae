@@ -10,3 +10,5 @@ sdb.addEventListener('update-target-url', (url) => {
   // console.log(sdb.src)
   // getCookies(console.log)
 })
+
+sdb.src = process.env.target
