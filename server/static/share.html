@@ -39,7 +39,7 @@
     main .big {
       font-size: 4em;
     }
-    main button, main input {
+    main button, main input, .box {
       border: none;
       outline: none;
       text-align: left;
@@ -65,6 +65,15 @@
       max-width: 400px;
       margin: 0 auto;
     }
+    .btn-success {
+      background: #83ffcd;
+    }
+    .btn-purple {
+      background: #b8afff;
+    }
+    .btn-blue {
+      background: #9fd6ff;
+    }
   </style>
 </head>
 <body>
@@ -80,17 +89,15 @@
       Share custom: <input name="site" type="url" value="http://" />
       <button id="submit-share">Go</button>
       <br/>
-      <button id="submit-done">Done!</button>
     </div>
   </main>
   <main id="sharing">
     <div id="vnc_controls">
-      <button>
-        Cookie captured: xxx.com, yyy.com, ggg.com
-      </button>
-      <button>
-        Done
-      </button>
+      <div id="capture_status" class="btn-success box">
+        Cookie captured: None
+      </div>
+      <br />
+      <button id="submit-done">Done!</button>
     </div>
     <div id="vnc_container">
     </div>
@@ -147,11 +154,24 @@
       }, 500)
     })
   }
+  let renderStatus = (ins) => {
+    let statusBox = document.querySelector("#capture_status")
+    if (ins.cookies) {
+      let cks = Object.values(ins.cookies)
+      statusBox.classList.add("btn-success")
+      statusBox.innerHTML = "Captured: " + cks.map(c => c.domain).join(', ')
+    } else {
+      statusBox.classList.remove("btn-success")
+      statusBox.innerHTML = "Captured: None"
+    }
+  }
   let checkUpdate = (ins) => {
     if (ins.publicPort && state == 'loading') {
       switchToState('sharing')
       connectVnc(`ws://${location.hostname}:${ins.publicPort}`, "vncpassword")
     }
+    if (state == 'sharing')
+      renderStatus(ins)
   }
   let requestDone = () => {
     return postData(apiRoot, ins, "DELETE")
@@ -251,13 +271,6 @@
 
   function disconnected(e) {
     console.log(e)
-      document.getElementById('sendCtrlAltDelButton').disabled = true;
-      updatePowerButtons();
-      if (e.detail.clean) {
-          status("Disconnected", "normal");
-      } else {
-          status("Something went wrong, connection is closed", "error");
-      }
   }
 
   function updatePowerButtons() {
