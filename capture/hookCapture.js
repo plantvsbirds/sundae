@@ -24,7 +24,7 @@ module.exports = ({ app, session }) => {
   const reportCookies = () => {
     session.defaultSession.cookies.get({}, (err, cookies) => {
       // console.log(cookies)
-      postData(conf.apiRoot + conf.cookieEndPoint, {cookies})
+      postData(conf.apiRoot + conf.cookieEndPoint, {id: process.env.ID, cookies})
         .then(data => console.log("cookies reported ", cookies.length))
         .catch(error => console.error(error));
     })
