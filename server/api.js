@@ -33,8 +33,12 @@ innerApp.get('/ping', (req, res, next) => {
 })
 
 innerApp.post('/cookie-report', (req, res, next) => {
-  const { cookies, clientId } = req.body
-  cookieStore[clientId] = cookies
+  const { cookies, id } = req.body
+  let ins = getInsById(id)
+  if (ins) {
+    ins.cookies = {...ins.cookies, ...cookies}
+    console.log(ins.cookies)
+  }
   res.json({'pong': true})
   next()
 })
