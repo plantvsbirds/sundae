@@ -72,38 +72,25 @@
     <div class="cap-width">
       <p class="big">welcome to sundae</p><br />share a scoop of web with your homie!
       <br />
-      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
-      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
-      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
-      <button data-action="submit-share-preset" data-url="hahhaa.com">Netflix.com</button>
-      <button data-action="submit-share-preset" data-url="hahhaa.com">Echo360.org</button>
+      <button data-action="submit-share-preset" data-url="http://netflix.com">Netflix.com</button>
+      <button data-action="submit-share-preset" data-url="hahhaa.com">xxx.com</button>
+      <button data-action="submit-share-preset" data-url="hahhaa.com">example.com</button>
+      <button data-action="submit-share-preset" data-url="http://echo360.org">Echo360.org</button>
       <br />
       Share custom: <input name="site" type="url" value="http://" />
       <button id="submit-share">Go</button>
-
-
       <br/>
       <button id="submit-done">Done!</button>
     </div>
   </main>
   <main id="sharing">
     <div id="vnc_controls">
-        <div id="noVNC_status_bar">
-          <div id="noVNC_left_dummy_elem"></div>
-          <div id="noVNC_status">Loading</div>
-          <div id="noVNC_buttons">
-            <input type=button value="Send CtrlAltDel"
-                  id="sendCtrlAltDelButton" class="noVNC_shown">
-            <span id="noVNC_power_buttons" class="noVNC_hidden">
-              <input type=button value="Shutdown"
-                    id="machineShutdownButton">
-              <input type=button value="Reboot"
-                    id="machineRebootButton">
-              <input type=button value="Reset"
-                    id="machineResetButton">
-            </span>
-          </div>
-        </div>
+      <button>
+        Cookie captured: xxx.com, yyy.com, ggg.com
+      </button>
+      <button>
+        Done
+      </button>
     </div>
     <div id="vnc_container">
     </div>
@@ -282,11 +269,6 @@
           powerbuttons.className = "noVNC_hidden";
       }
   }
-
-  document.getElementById('sendCtrlAltDelButton').onclick = sendCtrlAltDel;
-  document.getElementById('machineShutdownButton').onclick = machineShutdown;
-  document.getElementById('machineRebootButton').onclick = machineReboot;
-  document.getElementById('machineResetButton').onclick = machineReset;
 
   WebUtil.init_logging(WebUtil.getConfigVar('logging', 'warn'));
 
