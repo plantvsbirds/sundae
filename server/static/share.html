@@ -97,7 +97,7 @@
         Cookie captured: None
       </div>
       <br />
-      <button id="submit-done">Done!</button>
+      <button id="submit-sharing-done">Done!</button>
     </div>
     <div id="vnc_container">
     </div>
@@ -106,7 +106,10 @@
     Seriously loading
   </main>
   <main id="bye">
-    <button id="submit-done">Done!</button>
+    Copy this link to share!
+    <br />
+    <input type="text" id="share-link" style="width: 100%;" readonly autofocus>
+    <button id="submit-done">OK!</button>
   </main>
 </body>
 
@@ -172,6 +175,8 @@
     }
     if (state == 'sharing')
       renderStatus(ins)
+    if (ins.id)
+      document.querySelector("#share-link").value = location.origin + '/scoop/' + ins.id
   }
   let requestDone = () => {
     return postData(apiRoot, ins, "DELETE")
@@ -180,6 +185,11 @@
     switchToState("loading")
     requestShare({ url: document.querySelector("[name=site]").value })
   })
+  document.querySelector("#submit-sharing-done").addEventListener('click', () => {
+    switchToState("bye")
+    requestShare({ url: document.querySelector("[name=site]").value })
+  })
+  
   document.querySelector("#submit-done").addEventListener('click', () => {
     requestDone()
   })
