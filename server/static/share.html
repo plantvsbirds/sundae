@@ -86,7 +86,7 @@
       <button data-action="submit-share-preset" data-url="hahhaa.com">example.com</button>
       <button data-action="submit-share-preset" data-url="http://echo360.org">Echo360.org</button>
       <br />
-      Share custom: <input name="site" type="url" value="http://" />
+      Share custom: <input name="site" type="url" value="http://bbs.saraba1st.com/" />
       <button id="submit-share">Go</button>
       <br/>
     </div>
@@ -170,8 +170,13 @@
   }
   let checkUpdate = (ins) => {
     if (ins.publicPort && state == 'loading') {
-      switchToState('sharing')
-      connectVnc(`ws://${location.hostname}:${ins.publicPort}`, "vncpassword")
+      setTimeout(() => {
+        switchToState('sharing')
+        window.reconnect = () => {
+          connectVnc(`ws://${location.hostname}:${ins.publicPort}`, "vncpassword") 
+        }
+        connectVnc(`ws://${location.hostname}:${ins.publicPort}`, "vncpassword")
+      }, 1000)
     }
     if (state == 'sharing')
       renderStatus(ins)
@@ -280,7 +285,7 @@
   }
 
   function disconnected(e) {
-    console.log(e)
+    reconnect()
   }
 
   function updatePowerButtons() {
