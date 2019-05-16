@@ -1,1 +1,1 @@
-{"docker":{"apiRoot":"http://host.docker.internal:8081", "cookieEndPoint": "/cookie-report"},"dev":{"apiRoot":"http://localhost:8081", "cookieEndPoint": "/cookie-report"}}
+{"docker":{"apiRoot":"http://host.docker.internal:8081", "cookieEndPoint": "/cookie"},"dev":{"apiRoot":"http://localhost:8081", "cookieEndPoint": "/cookie"}}

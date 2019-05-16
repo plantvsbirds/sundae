@@ -32,7 +32,7 @@ innerApp.get('/ping', (req, res, next) => {
   next()
 })
 
-innerApp.post('/cookie-report', (req, res, next) => {
+innerApp.post('/cookie', (req, res, next) => {
   const { cookies, id } = req.body
   let ins = getInsById(id)
   if (ins) {
@@ -43,13 +43,32 @@ innerApp.post('/cookie-report', (req, res, next) => {
   next()
 })
 
+innerApp.get('/cookie/:id', (req, res, next) => {
+  const { id } = req.params
+  let ins = getInsById(id)
+  if (ins) {
+    res.json(ins.cookies)
+    next()
+  } else {
+    res.json({'pong': true})
+    next()
+  }
+})
+
 innerApp.listen(innerAppPort, '127.0.0.1')
 
-const startDockerSession = ({ id, url }) => {
+const startDockerSession = ({ id, url, scoop=false, share=true }) => {
   return docker.createContainer({
     Image: 'aa',
     // Cmd: []
-    Env: ["ID=" + id, "env=docker", `host=host.docker.internal:${innerAppPort}`, `target=${url}`],
+    Env: [
+      "ID=" + id,
+      "env=docker",
+      `host=host.docker.internal:${innerAppPort}`,
+      `target=${url}`,
+      `scoop=${scoop}`,
+      `share=${share}`,
+    ],
     PublishAllPorts: true,
     Tty: true,
     // Detach: true,
