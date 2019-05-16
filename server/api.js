@@ -37,7 +37,6 @@ innerApp.post('/cookie', (req, res, next) => {
   let ins = getInsById(id)
   if (ins) {
     ins.cookies = {...ins.cookies, ...cookies}
-    console.log(ins.cookies)
   }
   res.json({'pong': true})
   next()
@@ -50,14 +49,14 @@ innerApp.get('/cookie/:id', (req, res, next) => {
     res.json(ins.cookies)
     next()
   } else {
-    res.json({'pong': true})
+    res.status(404).json({'not': 'found'})
     next()
   }
 })
 
 innerApp.listen(innerAppPort, '127.0.0.1')
 
-const startDockerSession = ({ id, url, scoop=false, share=true }) => {
+const startDockerSession = ({ id, url, scoop, share }) => {
   return docker.createContainer({
     Image: 'aa',
     // Cmd: []
@@ -76,10 +75,12 @@ const startDockerSession = ({ id, url, scoop=false, share=true }) => {
   .then((container) => {
     // getInsById(id).container = container
     getInsById(id).cid = container.id
+    getInsById(id).ports = null
+    getInsById(id).publicPort = null
     return container.start()
   })
-  .then((dat) => {
-    console.log(dat)
+  .then((cinfo) => {
+    console.log(`container ${cinfo.id} started`)
     return Promise.resolve({ id })
   })
   .catch(dockerOpsErrHandler)
@@ -132,6 +133,24 @@ const pub = (ins) =>
 outerApp.use(express.static('static'));
 outerApp.get('/share', (req, res, next) => {
   res.sendFile('./static/share.html', {root: '.'})
+})
+
+outerApp.get('/scoop/:id', (req, res, next) => {
+  let { id }= req.params
+  if (getInsById(id)) {
+    res.sendFile('./static/scoop.html', {root: '.'})
+  } else {
+    res.status(404).send('Sorry, we cannot find that!');
+  }
+})
+outerApp.post('/scoop/:id', (req, res, next) => {
+  let { id }= req.params
+  let ins = getInsById(id)
+  if (ins) {
+    startDockerSession({...ins, scoop: true, share: false}).then(res.json({ id }))
+  } else {
+    res.status(404).send('Sorry, we cannot find that!');
+  }
 })
 
 outerApp.post('/share', (req, res, next) => {
