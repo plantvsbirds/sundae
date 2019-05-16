@@ -162,7 +162,7 @@
     if (ins.cookies) {
       let cks = Object.values(ins.cookies)
       statusBox.classList.add("btn-success")
-      statusBox.innerHTML = "Captured: " + cks.map(c => c.domain).join(', ')
+      statusBox.innerHTML = "Captured: " + Array.from(new Set(cks.map(c => c.domain))).join(', ')
     } else {
       statusBox.classList.remove("btn-success")
       statusBox.innerHTML = "Captured: None"
