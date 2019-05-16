@@ -26,3 +26,4 @@ function createWindow () {
 app.on('ready', createWindow)
 
 require('./hookCapture')({ app, session })
+require('./hookCookieLoading')({ app, session })

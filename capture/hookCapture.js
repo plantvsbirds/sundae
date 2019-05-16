@@ -22,18 +22,26 @@ function postData(url = ``, data = {}) {
 module.exports = ({ app, session }) => {
 
   const reportCookies = () => {
-    session.defaultSession.cookies.get({}, (err, cookies) => {
-      // console.log(cookies)
+    session.defaultSession.cookies.get({url: ''}, (err, cookies) => {
       postData(conf.apiRoot + conf.cookieEndPoint, {id: process.env.ID, cookies})
         .then(data => console.log("cookies reported ", cookies.length))
         .catch(error => console.error(error));
     })
   }
 
+  const logCookies = () => {
+    session.defaultSession.cookies.get({url: ''}, (err, cookies) => {
+      console.log(cookies.map(c => [c.name, c.domain]))
+    })
+  }
+
   app.on('ready', () => {
     cks = session.defaultSession.cookies
-    cks.addListener("changed", () => {
-      reportCookies()
+    session.defaultSession.clearStorageData([], (data) => {
+      logCookies()
+      cks.addListener("changed", () => {
+        reportCookies()
+      })
     })
   })
 
