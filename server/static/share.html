@@ -2,87 +2,20 @@
 <html>
 <head>
   <title></title>
-  <style type="text/css">
-    body {
-      padding-top: 5rem;
-      background: #fafafa;
-    }
-    main {
-      background: rgb(252, 243, 175);
-      font-weight: 100;
-      max-width: 56rem;
-      padding: 2rem;
-      margin: auto;
-      /* notorious 56kb */
-
-      font-family: -apple-system;
-
-      display: none;
-    }
-    main#sharing, #vnc_container {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: 0;
-      width: 100%;
-      max-width: 100%;
-      height: 100%;
-      max-height: 100%;
-      z-index: 1;
-    }
-    #vnc_controls {
-      position: fixed;
-      z-index: 2;
-    }
-    main .big {
-      font-size: 4em;
-    }
-    main button, main input, .box {
-      border: none;
-      outline: none;
-      text-align: left;
-
-      font-size: 14px;
-      line-height: 14px;
-      font-weight: 600;
-      background-color: #fff;
-      border: solid #222 2px;
-      display: inline-block;
-      border-radius: 5px;
-      padding: 6px 12px;
-      cursor: pointer;
-      position: relative;
-      vertical-align: middle;
-      margin: .07em;
-      margin-bottom: .4em;
-    }
-    main button:hover {
-      background: #ededed;
-    }
-    .cap-width {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .btn-success {
-      background: #83ffcd;
-    }
-    .btn-purple {
-      background: #b8afff;
-    }
-    .btn-blue {
-      background: #9fd6ff;
-    }
-  </style>
+  <link rel="stylesheet" href="/sundae.css">
 </head>
 <body>
   <main id="begin">
     <div class="cap-width">
-      <p class="big">welcome to sundae</p><br />share a scoop of web with your homie!
-      <br />
+      <p class="big">sundae</p>
+        <br />
+        share a scoop of web with your homie!
+        <br />
+        <br />
+        <!--
+          <textarea name="" id="" cols="30" rows="10" placeholder="w/ a note..."></textarea>
+        -->
       <button data-action="submit-share-preset" data-url="http://netflix.com">Netflix.com</button>
-      <button data-action="submit-share-preset" data-url="hahhaa.com">xxx.com</button>
       <button data-action="submit-share-preset" data-url="hahhaa.com">example.com</button>
       <button data-action="submit-share-preset" data-url="http://echo360.org">Echo360.org</button>
       <br />
@@ -93,11 +26,8 @@
   </main>
   <main id="sharing">
     <div id="vnc_controls">
-      <div id="capture_status" class="btn-success box">
-        Cookie captured: None
-      </div>
-      <br />
       <button id="submit-sharing-done">Done!</button>
+      <div id="capture_status" class="bg-success box"></div>
     </div>
     <div id="vnc_container">
     </div>
@@ -106,9 +36,11 @@
     Seriously loading
   </main>
   <main id="bye">
-    Copy this link to share!
+    <p>
+        Copy this link to share!
+    </p>
+    <input type="text" id="share-link" style="width: 70%;" readonly autofocus>
     <br />
-    <input type="text" id="share-link" style="width: 100%;" readonly autofocus>
     <button id="submit-done">OK!</button>
   </main>
 </body>
@@ -161,10 +93,10 @@
     let statusBox = document.querySelector("#capture_status")
     if (ins.cookies) {
       let cks = Object.values(ins.cookies)
-      statusBox.classList.add("btn-success")
+      statusBox.classList.add("bg-success")
       statusBox.innerHTML = "Captured: " + Array.from(new Set(cks.map(c => c.domain))).join(', ')
     } else {
-      statusBox.classList.remove("btn-success")
+      statusBox.classList.remove("bg-success")
       statusBox.innerHTML = "Captured: None"
     }
   }
