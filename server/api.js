@@ -1,21 +1,21 @@
-const express = require('express')
-const innerApp = express()
-const innerAppPort = 8081
-const outerApp = express()
-const outerAppPort = 8080
-
-const expressBodyParser = require('body-parser')
-innerApp.use(expressBodyParser.json())
-outerApp.use(expressBodyParser.json())
-
-const outerAppLongPoll = require("express-longpoll")(outerApp)
-
 const uuid = require('uuid/v1')
 
 const Dockerode = require('dockerode')
 const docker = new Dockerode()
 
-const cookieStore = {}
+const express = require('express')
+const expressBodyParser = require('body-parser')
+
+const innerAppPort = 8081
+const innerApp = express()
+innerApp.use(expressBodyParser.json())
+
+const outerAppPort = 8080
+const outerApp = express()
+const outerAppLongPoll = require("express-longpoll")(outerApp)
+outerApp.use(expressBodyParser.json())
+
+
 const instanceStages = [
   'CREATE',
   'RUNNING',
@@ -26,6 +26,7 @@ let instances = []
 let getInsById = (id) => instances.find((i) => i.id == id)
 let getInsByCid = (id) => instances.find((i) => i.cid == id)
 let dockerOpsErrHandler = err => console.log(err)
+
 
 innerApp.get('/ping', (req, res, next) => {
   res.json({'pong': true})
@@ -78,6 +79,7 @@ const startDockerSession = ({ id, url, scoop, share }) => {
     getInsById(id).cid = container.id
     getInsById(id).ports = null
     getInsById(id).publicPort = null
+    getInsById(id).container = container
     return container.start()
   })
   .then((cinfo) => {
@@ -111,21 +113,30 @@ const createInstance = ({ payload }) => {
     stage: instanceStages[0],
   }
   instances.push(ins)
-  outerAppLongPoll.create('/' + ins.id, {})
-  ins.poll = setInterval(() => {
-    pub(ins)
-  }, 500)
+  const createPoll = (ins) => {
+    outerAppLongPoll.create('/' + ins.id, {})
+    ins.poll = setInterval(() => {
+      pub(ins)
+    }, 500)
+  }
+  createPoll(ins)
   return startDockerSession(ins)
 }
 const killInstance = ({ payload: { id } }) => {
   let ins = getInsById(id)
+  if (!ins)
+    return null
+  
   ins.stage = 'KILLING'
+  return ins.container.kill()
+    .then(() => {
+      pub(ins)
+      setTimeout(() => {
+        clearInterval(ins.poll)
+      }, 60 * 1000) 
 
-  pub(ins)
-  setTimeout(() => {
-    clearInterval(ins.poll)
-  }, 60 * 1000) 
-  return {id: ins.id}
+    })
+    .catch(dockerOpsErrHandler)
 }
 
 const pub = (ins) => 
@@ -159,7 +170,9 @@ outerApp.post('/share', (req, res, next) => {
 })
 
 outerApp.delete('/share', (req, res, next) => {
-  res.json(killInstance({ payload: req.body }))
+  killInstance({ payload: req.body }).then(() => {
+    res.json({})
+  })
 })
 
 outerApp.listen(outerAppPort)
