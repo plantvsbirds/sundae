@@ -41,7 +41,6 @@
     </p>
     <input type="text" id="share-link" style="width: 70%;" readonly autofocus>
     <br />
-    <button id="submit-done">OK!</button>
   </main>
 </body>
 
@@ -124,11 +123,9 @@
   })
   document.querySelector("#submit-sharing-done").addEventListener('click', () => {
     switchToState("bye")
-  })
-  
-  document.querySelector("#submit-done").addEventListener('click', () => {
     requestDone()
   })
+  
   switchToState("begin")
 </script>
 
@@ -216,6 +213,7 @@
   }
 
   function disconnected(e) {
+    // ??
     reconnect()
   }
 
