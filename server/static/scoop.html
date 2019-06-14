@@ -90,8 +90,6 @@
     }
     if (state == 'sharing')
       renderStatus(ins)
-    if (ins.id)
-      document.querySelector("#share-link").value = location.origin + '/scoop/' + ins.id
   }
   let requestDone = () => {
     return postData(apiRoot, ins, "DELETE")

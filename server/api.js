@@ -138,14 +138,14 @@ const killInstance = ({ payload: { id } }) => {
       pub(ins)
       setTimeout(() => {
         clearInterval(ins.poll)
-      }, 60 * 1000) 
-
+      }, 60 * 1000)
     })
     .catch(dockerOpsErrHandler)
 }
 
-const pub = (ins) => 
-    outerAppLongPoll.publish('/' + ins.id, ins)
+const pub = (ins) =>
+    outerAppLongPoll.publish('/' + ins.id, {container: null, ...ins})
+    // todo properly deal with stringify
 
 outerApp.use(express.static('static'));
 outerApp.get('/share', (req, res, next) => {
