@@ -1,3 +1,4 @@
+# tag sundae-env
 FROM consol/ubuntu-xfce-vnc
 
 USER 0
@@ -18,6 +19,6 @@ RUN cd /sundae/sundae-capture/ && npm install
 
 ADD ./sundae-vnc.sh /dockerstartup/
 RUN chmod 777 /dockerstartup/sundae-vnc.sh
-ENTRYPOINT ["/dockerstartup/sundae-vnc.sh"]
+# ENTRYPOINT ["/dockerstartup/sundae-vnc.sh"]
 
 USER 1000
