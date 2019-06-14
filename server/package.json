@@ -12,6 +12,6 @@
     "uuid": "^3.3.2"
   },
   "scripts": {
-    "dev": "sudo nodemon api.js"
+    "dev": "sudo nodemon index.js"
   }
 }
