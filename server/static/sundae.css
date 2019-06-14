@@ -10,7 +10,7 @@ main {
     margin: auto;
     /* notorious 56kb */
 
-    font-family: -apple-system;
+    font-family: sans-serif, -apple-system;
     text-align: center;
 
     display: none;
