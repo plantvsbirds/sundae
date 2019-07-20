@@ -56,7 +56,7 @@ innerApp.get('/cookie/:id', (req, res, next) => {
 })
 
 const hostAccessAddressFromDocker = '172.20.10.11'
-innerApp.listen(innerAppPort, hostAccessAddressFromDocker)
+innerApp.listen(innerAppPort, '0.0.0.0')
 
 const startDockerSession = ({ id, url, scoop, share }) => {
   return docker.createContainer({
@@ -98,7 +98,7 @@ const instanceStatusUpdateInterval = setInterval(() => {
   docker.listContainers({
     all: false,
   }).then((containers) => {
-    containers.filter(({ Ports, Id }) => {
+    containers.filter(({ NetworkSettings, Ports, Id }) => {
       let ins = getInsByCid(Id)
       if (!ins)
         return
@@ -111,6 +111,13 @@ const instanceStatusUpdateInterval = setInterval(() => {
   .catch(dockerOpsErrHandler)
 }, 500)
 
+const createPoll = (ins) => {
+    outerAppLongPoll.create('/' + ins.id, {})
+    ins.poll = setInterval(() => {
+      pub(ins)
+    }, 500)
+  }
+
 const createInstance = ({ payload }) => {
   let ins = {
     ...payload,
@@ -118,12 +125,6 @@ const createInstance = ({ payload }) => {
     stage: instanceStages[0],
   }
   instances.push(ins)
-  const createPoll = (ins) => {
-    outerAppLongPoll.create('/' + ins.id, {})
-    ins.poll = setInterval(() => {
-      pub(ins)
-    }, 500)
-  }
   createPoll(ins)
   return startDockerSession(ins)
 }
@@ -143,10 +144,13 @@ const killInstance = ({ payload: { id } }) => {
     .catch(dockerOpsErrHandler)
 }
 
-const pub = (ins) =>
-    outerAppLongPoll.publish('/' + ins.id, {container: null, ...ins})
-    // todo properly deal with stringify
+const pub = (ins) => {
+    let _ins = {...ins}
+    _ins.container = null
+    _ins.poll = null
 
+    outerAppLongPoll.publish('/' + ins.id, _ins)
+}
 outerApp.use(express.static('static'));
 outerApp.get('/share', (req, res, next) => {
   res.sendFile('./static/share.html', {root: '.'})
@@ -164,7 +168,10 @@ outerApp.post('/scoop/:id', (req, res, next) => {
   let { id }= req.params
   let ins = getInsById(id)
   if (ins) {
-    startDockerSession({...ins, scoop: true, share: false}).then(res.json({ id }))
+    startDockerSession({...ins, scoop: true, share: false}).then(() => {
+        res.json({ id })
+        createPoll(ins)
+    })
   } else {
     res.status(404).send('Sorry, we cannot find that!');
   }
