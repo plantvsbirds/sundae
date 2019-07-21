@@ -1,4 +1,7 @@
 const uuidv4 = require('uuid/v4');
+const API_RESP_HEADER = new Headers({
+  'Content-Type': 'application/json'
+})
 
 /**
  * Fetch and log a request
@@ -13,8 +16,12 @@ export async function handleRegistrationRequest(request) {
     id: uuidv4(),
     expiry: (new Date()).getTime() + FIVE_MIN
   }
-  console.log(userInfo)
   console.log(await SundaeStore.put(userInfo.id, JSON.stringify(userInfo)))
-  return new Response(userInfo.id,
-    { status: 200 })
+  return new Response(
+    JSON.stringify(userInfo),
+    {
+      status: 200,
+      headers: API_RESP_HEADER,
+    }
+  )
 }
