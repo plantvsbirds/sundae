@@ -1,11 +1,11 @@
 /**
- * jsproxy cfworker api
+ * sundae proxy
+ * based on jsproxy cfworker api
  * https://github.com/EtherDream/jsproxy/
  */
 'use strict'
 
-const JS_VER = 4
-
+const HDR_KEY_SUNDAE_ID = "--sundae-id"
 const PREFLIGHT_INIT = {
   status: 204,
   headers: new Headers({
@@ -16,25 +16,18 @@ const PREFLIGHT_INIT = {
   }),
 }
 
-
-addEventListener('fetch', e => {
-  const ret = handler(e.request)
-  e.respondWith(ret)
-})
-
-
 /**
  * @param {Request} req
  */
-async function handler(req) {
-  const reqHdrRaw = req.headers
-  if (reqHdrRaw.has('x-jsproxy')) {
+export async function handleProxyRequest(req) {
+  const reqHdrFromClient = req.headers
+  if (reqHdrFromClient.has('x-jsproxy')) {
     return Response.error()
   }
 
   // preflight
   if (req.method === 'OPTIONS' &&
-      reqHdrRaw.has('access-control-request-headers')
+      reqHdrFromClient.has('access-control-request-headers')
   ) {
     return new Response(null, PREFLIGHT_INIT)
   }
@@ -46,52 +39,69 @@ async function handler(req) {
   let rawLen = ''
   let rawEtag = ''
 
-  const reqHdrNew = new Headers(reqHdrRaw)
-  reqHdrNew.set('x-jsproxy', '1')
+  const reqHdrToRemoteResource = new Headers(reqHdrFromClient)
+  reqHdrToRemoteResource.set('x-jsproxy', '1')
 
-  for (const [k, v] of reqHdrRaw.entries()) {
+  if (!reqHdrFromClient.has(HDR_KEY_SUNDAE_ID))
+    return new Response("No Sundae Identity Found", {
+      status: 401
+    })
+  const sundaeUserInfo = JSON.parse(await SundaeStore.get(reqHdrFromClient.get(HDR_KEY_SUNDAE_ID)))
+  if (!sundaeUserInfo)
+    return new Response("No Sundae Identity Found", {
+      status: 401
+    })
+  console.log(sundaeUserInfo)
+  const sundaeIdExpiry = new Date(sundaeUserInfo.expiry)
+  if (!sundaeUserInfo.expiry || (new Date()) > sundaeIdExpiry) {
+    return new Response("Sundae Identity Expired", {
+      status: 402
+    })
+  }
+
+  for (const [k, v] of reqHdrFromClient.entries()) {
     if (!k.startsWith('--')) {
       continue
     }
-    reqHdrNew.delete(k)
+    reqHdrToRemoteResource.delete(k)
 
     const k2 = k.substr(2)
     switch (k2) {
-    case 'url':
-      urlObj = new URL(v)
-      break
-    case 'aceh':
-      acehOld = true
-      break
-    case 'raw-info':
-      [rawSvr, rawLen, rawEtag] = v.split('|')
-      break
-    case 'level':
-    case 'mode':
-    case 'type':
-      break
-    case 'ext':
-      extHdrs = JSON.parse(v)
-      break
-    default:
-      if (v) {
-        reqHdrNew.set(k2, v)
-      } else {
-        reqHdrNew.delete(k2)
-      }
-      break
+      case 'url':
+        urlObj = new URL(v)
+        break
+      case 'aceh':
+        acehOld = true
+        break
+      case 'raw-info':
+        [rawSvr, rawLen, rawEtag] = v.split('|')
+        break
+      case 'ext':
+        extHdrs = JSON.parse(v)
+        break
+      case 'level':
+      case 'mode':
+      case 'type':
+          break
+      default:
+        if (v) {
+          reqHdrToRemoteResource.set(k2, v)
+        } else {
+          reqHdrToRemoteResource.delete(k2)
+        }
+        break
     }
   }
   if (extHdrs) {
     for (const [k, v] of Object.entries(extHdrs)) {
-      reqHdrNew.set(k, v)
+      reqHdrToRemoteResource.set(k, v)
     }
   }
   const reqInit = {
     method: req.method,
-    headers: reqHdrNew,
+    headers: reqHdrToRemoteResource,
   }
-  return proxy(urlObj, reqInit, acehOld, rawLen, 0)
+  return requestRemoteResource(urlObj, reqInit, acehOld, rawLen, 0)
 }
 
 
@@ -101,7 +111,7 @@ async function handler(req) {
  * @param {RequestInit} reqInit 
  * @param {number} retryTimes 
  */
-async function proxy(urlObj, reqInit, acehOld, rawLen, retryTimes) {
+async function requestRemoteResource(urlObj, reqInit, acehOld, rawLen, retryTimes) {
   console.log(urlObj)
   if (!urlObj || !urlObj.href) {
     return new Response("pong", {
@@ -109,24 +119,26 @@ async function proxy(urlObj, reqInit, acehOld, rawLen, retryTimes) {
     })
   }
   const res = await fetch(urlObj.href, reqInit)
-  const resHdrOld = res.headers
-  const resHdrNew = new Headers(resHdrOld)
+  const resHdrFromRemoteResource = res.headers
+  const resHdrToClient = new Headers(resHdrFromRemoteResource)
 
   let expose = '*'
   let vary = '--url'
   
-  for (const [k, v] of resHdrOld.entries()) {
+  for (const [k, v] of resHdrFromRemoteResource.entries()) {
     if (k === 'access-control-allow-origin' ||
         k === 'access-control-expose-headers' ||
         k === 'location' ||
         k === 'set-cookie'
     ) {
+      // todo sundae handle cookie
+      // push to kv accordingly
       const x = '--' + k
-      resHdrNew.set(x, v)
+      resHdrToClient.set(x, v)
       if (acehOld) {
         expose = expose + ',' + x
       }
-      resHdrNew.delete(k)
+      resHdrToClient.delete(k)
     }
     else if (k === 'vary') {
       vary = vary + ',' + v
@@ -145,16 +157,16 @@ async function proxy(urlObj, reqInit, acehOld, rawLen, retryTimes) {
 
   if (acehOld) {
     expose = expose + ',--s'
-    resHdrNew.set('--t', '1')
+    resHdrToClient.set('--t', '1')
   }
 
-  resHdrNew.set('access-control-expose-headers', expose)
-  resHdrNew.set('access-control-allow-origin', '*')
-  resHdrNew.set('vary', vary)
-  resHdrNew.set('--s', res.status)
+  resHdrToClient.set('access-control-expose-headers', expose)
+  resHdrToClient.set('access-control-allow-origin', '*')
+  resHdrToClient.set('vary', vary)
+  resHdrToClient.set('--s', res.status)
 
   // verify
-  const newLen = resHdrOld.get('content-length') || ''
+  const newLen = resHdrFromRemoteResource.get('content-length') || ''
   const badLen = (rawLen !== newLen)
 
   let status = 200
@@ -164,20 +176,20 @@ async function proxy(urlObj, reqInit, acehOld, rawLen, retryTimes) {
     if (retryTimes < 1) {
       urlObj = await parseYtVideoRedir(urlObj, newLen, res)
       if (urlObj) {
-        return proxy(urlObj, reqInit, acehOld, rawLen, retryTimes + 1)
+        return requestRemoteResource(urlObj, reqInit, acehOld, rawLen, retryTimes + 1)
       }
     }
     status = 400
     body = `bad len (old: ${rawLen} new: ${newLen})`
-    resHdrNew.set('cache-control', 'no-cache')
+    resHdrToClient.set('cache-control', 'no-cache')
   }
 
-  resHdrNew.set('--retry', retryTimes)
-  resHdrNew.set('--ver', JS_VER)
+  resHdrToClient.set('--retry', retryTimes)
+  resHdrToClient.set('--sundae-build', __webpack_hash__)
 
   return new Response(body, {
     status,
-    headers: resHdrNew,
+    headers: resHdrToClient,
   })
 }
 

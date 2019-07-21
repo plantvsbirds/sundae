@@ -14,7 +14,7 @@ export async function handleRegistrationRequest(request) {
     expiry: (new Date()).getTime() + FIVE_MIN
   }
   console.log(userInfo)
-  console.log(await SundaeStore.put(userInfo.id, userInfo))
-  return new Response("Your id is" + userInfo.id,
+  console.log(await SundaeStore.put(userInfo.id, JSON.stringify(userInfo)))
+  return new Response(userInfo.id,
     { status: 200 })
 }

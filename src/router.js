@@ -83,6 +83,10 @@ class Router {
         return this.handle([], handler)
     }
 
+    allMethods(url, handler) {
+        return this.handle([Path(url)], handler)
+    }
+
     route(req) {
         const route = this.resolve(req)
 
