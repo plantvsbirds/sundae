@@ -1,6 +1,7 @@
 const uuidv4 = require('uuid/v4');
 const API_RESP_HEADER = new Headers({
-  'Content-Type': 'application/json'
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
 })
 
 /**
