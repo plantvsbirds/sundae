@@ -1,7 +1,7 @@
 {
     "name": "sundae-worker",
     "version": "1.0.0",
-    "description": "package for creating workers templates",
+    "description": "sundae cfw",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
         "pub": "./wrangler publish"
     },
     "author": "Aluba Mister <luln@pm.me>",
-    "license": "ISC",
+    "license": "UNLICENSED",
     "devDependencies": {
         "prettier": "^1.17.0"
     },
