@@ -5,6 +5,7 @@
  */
 'use strict'
 
+const { Request, Response, Headers } = require('node-fetch')
 const HDR_KEY_SUNDAE_ID = "--sundae-id"
 const PREFLIGHT_INIT = {
   status: 204,
@@ -16,10 +17,12 @@ const PREFLIGHT_INIT = {
   }),
 }
 
+module.exports = {}
+
 /**
  * @param {Request} req
  */
-export async function handleProxyRequest(req) {
+module.exports.handleProxyRequest = async function (req) {
   const reqHdrFromClient = req.headers
   if (reqHdrFromClient.has('x-jsproxy')) {
     return Response.error()
