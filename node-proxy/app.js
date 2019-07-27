@@ -2,6 +2,7 @@ const http = require('http')
 const parser = require('url')
 const bodyParser = require('body-parser')
 const { ServerResponse } = require('http')
+const { Readable } = require('stream')
 const { Request, Response, Headers } = require('node-fetch')
 const { promisify } = require('util');
 
@@ -34,10 +35,16 @@ const convFetchResToHttpRes = async (fetchRes, res) => {
     if (!fetchRes.ok) {
         console.log("fetchRes not ok")
         console.log(fetchRes)
-        return retStatus(res, 500)
+        // return retStatus(res, 500)
     }
+
     res.writeHead(fetchRes.status, fetchRes.headers.raw())
-    fetchRes.body.pipe(res)
+
+    if (fetchRes.body instanceof Readable)
+        fetchRes.body.pipe(res)
+    else
+        res.end(fetchRes.body)
+
     await promisify(res.end)
     return
 }
