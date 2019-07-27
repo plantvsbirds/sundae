@@ -1,0 +1,12 @@
+{
+  "name": "node-proxy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "hong lin",
+  "license": "unlicensed",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "node-fetch": "^2.6.0"
+  }
+}
