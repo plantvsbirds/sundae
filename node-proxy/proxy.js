@@ -44,7 +44,7 @@ module.exports.handleProxyRequest = async function (req) {
 
   const reqHdrToRemoteResource = new Headers(reqHdrFromClient)
   reqHdrToRemoteResource.set('x-jsproxy', '1')
-
+/*
   if (!reqHdrFromClient.has(HDR_KEY_SUNDAE_ID))
     return new Response("No Sundae Identity Found", {
       status: 401
@@ -61,7 +61,7 @@ module.exports.handleProxyRequest = async function (req) {
       status: 402
     })
   }
-
+*/
   for (const [k, v] of reqHdrFromClient.entries()) {
     if (!k.startsWith('--')) {
       continue

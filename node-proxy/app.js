@@ -1,15 +1,15 @@
 const http = require('http')
-const { ServerResponse } = require('http')
 const parser = require('url')
-var bodyParser = require('body-parser')
+const bodyParser = require('body-parser')
+const { ServerResponse } = require('http')
 const { Request, Response, Headers } = require('node-fetch')
 const { promisify } = require('util');
 
 const { handleProxyRequest } = require('./proxy')
 
-const retEmpty = (res) => {
-    res.writeHead(404, {'Content-Type': 'text/plain'})
-    res.write("404\n")
+const retStatus = (res, st) => {
+    res.writeHead(st, {'Content-Type': 'text/plain'})
+    res.write(`${st}\n`)
     res.end()
 }
 
@@ -30,19 +30,23 @@ const convHttpReqToFetchReq = async (req) => {
     })
     return newReq
 }
-const convFetchResToHttpRes = async (res) => {
-    newRes = new ServerResponse({})
-    return newRes
+const convFetchResToHttpRes = async (fetchRes, res) => {
+    if (!fetchRes.ok) {
+        console.log("fetchRes not ok")
+        console.log(fetchRes)
+        return retStatus(res, 500)
+    }
+    res.writeHead(fetchRes.status, fetchRes.headers.raw())
+    fetchRes.body.pipe(res)
+    await promisify(res.end)
+    return
 }
 const doProxy = async (req, res) => {
-    let [newReq, newRes] =
-        [await convHttpReqToFetchReq(req), await convFetchResToHttpRes(res)]
+    let newReq = await convHttpReqToFetchReq(req)
 
     const proxyRes = await handleProxyRequest(newReq)
 
-    res.writeHead(404, {'Content-Type': 'text/plain'})
-    res.write("40123\n")
-    res.end()
+    return await convFetchResToHttpRes(proxyRes, res)
 }
 
 const server = http.createServer(async (req, res) => {
@@ -50,7 +54,7 @@ const server = http.createServer(async (req, res) => {
     const { pathname } = url
     if (pathname === '/proxy')
         return await doProxy(req, res)
-    return retEmpty(res)
+    return retStatus(res, 404)
 })
 
 
