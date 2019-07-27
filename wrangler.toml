@@ -1,0 +1,11 @@
+name = "sundae-worker"
+type = "webpack"
+zone_id = "305fa122586254657682dae665bb3c6b"
+private = true
+account_id = "7bc2fe4c5cebb04a59ba7aff9c6f56f4"
+route = "sundae-worker"
+webpack_config = "webpack.config.js"
+
+[[kv-namespaces]]
+id = "d46bf975bebd4c7f9e2a16f0cf765fb6"
+binding = "SundaeStore"

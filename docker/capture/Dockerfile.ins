@@ -1,0 +1,15 @@
+FROM sundae-env
+
+# todo: copy electron
+ADD ./docker /sundae
+
+
+ADD ./ /sundae/sundae-capture/
+
+# USER 0
+
+RUN cd /sundae/sundae-capture/ && rm -rf node_modules
+RUN cd /sundae/sundae-capture/ && npm install
+
+ENTRYPOINT ["/dockerstartup/vnc_startup.sh", "/sundae/start.sh"]
+USER 1000
