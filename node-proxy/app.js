@@ -14,12 +14,12 @@ const retEmpty = (res) => {
 }
 
 const shouldReqHaveBody = (req) => !(new Set(['GET', 'HEAD'])).has(req.method)
-const convHttpReqToFetchReq = async (req) => {
-    const parser = promisify(bodyParser.raw({
-        type: "*/*"
-    }))
+const reqBodyParser = promisify(bodyParser.raw({
+    type: "*/*"
+}))
 
-    await parser(req, null)
+const convHttpReqToFetchReq = async (req) => {
+    await reqBodyParser(req, null)
 
     newReq = new Request("/proxy", {
         method: req.method,
@@ -31,7 +31,7 @@ const convHttpReqToFetchReq = async (req) => {
     return newReq
 }
 const convFetchResToHttpRes = async (res) => {
-    newRes = new ServerResponse()
+    newRes = new ServerResponse({})
     return newRes
 }
 const doProxy = async (req, res) => {
@@ -40,7 +40,6 @@ const doProxy = async (req, res) => {
 
     const proxyRes = await handleProxyRequest(newReq)
 
-    console.log(proxyRes)
     res.writeHead(404, {'Content-Type': 'text/plain'})
     res.write("40123\n")
     res.end()
