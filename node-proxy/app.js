@@ -28,6 +28,8 @@ const convHttpReqToFetchReq = async (req) => {
         body: shouldReqHaveBody(req) ? req.body : undefined,
         redirect: 'manual', // use headers setting
         signal: null, // pass AbortSignal
+
+        follow: 0,
     })
     return newReq
 }
@@ -37,15 +39,20 @@ const convFetchResToHttpRes = async (fetchRes, res) => {
         console.log(fetchRes)
         // return retStatus(res, 500)
     }
+    console.log(fetchRes.status)
+    // console.log(fetchRes.body)
+    // console.log("^^")
+    // console.log(fetchRes.body instanceof Readable)
 
     res.writeHead(fetchRes.status, fetchRes.headers.raw())
 
-    if (fetchRes.body instanceof Readable)
+    if (fetchRes.body instanceof Readable) {
         fetchRes.body.pipe(res)
-    else
+        await promisify(res.end)
+    } else
         res.end(fetchRes.body)
 
-    await promisify(res.end)
+    // await promisify(res.end)
     return
 }
 const doProxy = async (req, res) => {
@@ -59,7 +66,7 @@ const doProxy = async (req, res) => {
 const server = http.createServer(async (req, res) => {
     const url = parser.parse(req.url, true)
     const { pathname } = url
-    if (pathname === '/proxy')
+    if (pathname === '/proxy/http')
         return await doProxy(req, res)
     return retStatus(res, 404)
 })

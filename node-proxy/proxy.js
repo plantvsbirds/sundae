@@ -6,6 +6,7 @@
 'use strict'
 
 const { Request, Response, Headers } = require('node-fetch')
+const fetch = require('node-fetch')
 const HDR_KEY_SUNDAE_ID = "--sundae-id"
 const PREFLIGHT_INIT = {
   status: 204,
@@ -104,6 +105,10 @@ module.exports.handleProxyRequest = async function (req) {
     method: req.method,
     headers: reqHdrToRemoteResource,
   }
+
+  reqHdrToRemoteResource.set('host', urlObj.host)
+  reqHdrToRemoteResource.set('origin', urlObj.host)
+
   return requestRemoteResource(urlObj, reqInit, acehOld, rawLen, 0)
 }
 
@@ -115,13 +120,15 @@ module.exports.handleProxyRequest = async function (req) {
  * @param {number} retryTimes 
  */
 async function requestRemoteResource(urlObj, reqInit, acehOld, rawLen, retryTimes) {
-  console.log(urlObj)
   if (!urlObj || !urlObj.href) {
     return new Response("pong", {
       status: 404,
     })
   }
+  console.log(reqInit.headers.raw())
+  console.log("!!!")
   const res = await fetch(urlObj.href, reqInit)
+  // console.log(res)
   const resHdrFromRemoteResource = res.headers
   const resHdrToClient = new Headers(resHdrFromRemoteResource)
 
@@ -188,7 +195,7 @@ async function requestRemoteResource(urlObj, reqInit, acehOld, rawLen, retryTime
   }
 
   resHdrToClient.set('--retry', retryTimes)
-  resHdrToClient.set('--sundae-build', __webpack_hash__)
+//   resHdrToClient.set('--sundae-build', __webpack_hash__)
 
   return new Response(body, {
     status,
