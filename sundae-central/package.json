@@ -1,0 +1,9 @@
+{
+  "name": "sundae-central",
+  "version": "1.0.0",
+  "description": "central sundae service",
+  "main": "app.js",
+  "author": "hong",
+  "license": "UNLICENSED",
+  "private": true
+}
