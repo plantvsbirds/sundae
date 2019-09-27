@@ -12,3 +12,5 @@ sdb.addEventListener('update-target-url', (url) => {
 })
 
 sdb.src = process.env.target
+sdb.src = 'https://www.google.com'
+console.log(`loading ${sdb.src}`)

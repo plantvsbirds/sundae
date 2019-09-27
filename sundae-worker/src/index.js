@@ -1,13 +1,9 @@
-const uuidv4 = require('uuid/v4')
-
-const apiRootPrefix = '/api-test'
+const apiRootPrefix = ''
 const Router = require('./router')
 
 
 // SundaeStore
-import { handleRegistrationRequest } from './registration'
 import { handleProxyRequest } from './proxy'
-const SundaeProxy = require('./registration')
 
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event.request))
@@ -16,8 +12,10 @@ addEventListener('fetch', event => {
 async function handleRequest(request) {
     const r = new Router()
     // Replace with the approriate paths and handlers
-    
-    r.get(apiRootPrefix + '/reg', handleRegistrationRequest)
+    // todo import key
+    // todo unpack req
+    // todo authenticate
+
     r.allMethods(apiRootPrefix + '/proxy', handleProxyRequest)
     r.get(apiRootPrefix + '/', () => new Response(__webpack_hash__)) // return a default message for the root route
 

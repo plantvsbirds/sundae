@@ -1,6 +1,10 @@
 const fetch = require('electron-fetch').default
 const conf = require('./config.json')[process.env.env || 'dev']
 
+const fs = require('fs')
+
+
+
 function postData(url = ``, data = {}) {
   // Default options are marked with *
     return fetch(url, {
@@ -23,6 +27,7 @@ module.exports = ({ app, session }) => {
 
   const reportCookies = () => {
     session.defaultSession.cookies.get({url: ''}, (err, cookies) => {
+      fs.writeFile("cookies.log.json", JSON.stringify(cookies), () => { console.log('disked') })
       postData(conf.apiRoot + conf.cookieEndPoint, {id: process.env.ID, cookies})
         .then(data => console.log("cookies reported ", cookies.length))
         .catch(error => console.error(error));
