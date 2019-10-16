@@ -219,8 +219,8 @@
       });
       rfb.addEventListener("credentialsrequired", credentials);
       rfb.addEventListener("desktopname", updateDesktopName);
-      rfb.scaleViewport = WebUtil.getConfigVar('scale', false);
-      rfb.resizeSession = 'scale';
+      rfb.scaleViewport = true;
+      rfb.resizeSession = true;
   });
 </script>
 

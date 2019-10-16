@@ -6,7 +6,6 @@ main {
     background: rgb(252, 243, 175);
     font-weight: 100;
     max-width: 56rem;
-    padding: 2rem;
     margin: auto;
     /* notorious 56kb */
 
@@ -31,6 +30,7 @@ main#sharing, #vnc_container {
 #vnc_controls {
     position: fixed;
     z-index: 2;
+    padding: 2rem;
 }
 main .big {
     font-size: 3em;
