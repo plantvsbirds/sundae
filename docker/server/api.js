@@ -177,6 +177,12 @@ outerApp.post('/scoop/:id', (req, res, next) => {
   }
 })
 
+outerApp.delete('/scoop/:id', (req, res, next) => {
+  killInstance({ payload: req.body }).then(() => {
+    res.json({})
+  })
+})
+
 outerApp.post('/share', (req, res, next) => {
   createInstance({ payload: req.body }).then((d) => res.json(d))
 })
