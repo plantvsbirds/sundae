@@ -21,6 +21,11 @@ sdb.addEventListener('update-target-url', (url) => {
   // getCookies(console.log)
 })
 
+sdb.addEventListener("dom-ready", event => {
+  // Remove this once https://github.com/electron/electron/issues/14474 is fixed
+  sdb.blur();
+  sdb.focus();
+});
 
 sdb.src = process.env.target || 'https://www.google.com'
 console.log(`loading ${sdb.src}`)
