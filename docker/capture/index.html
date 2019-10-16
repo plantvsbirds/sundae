@@ -15,12 +15,23 @@
       disablewebsecurity
       
     -->
+    <div id="loading-indicator">Loading</div>
     <webview disablewebsecurity id="sundae-browser"></webview>
     <style>
-      webview {
+      webview, #loading-indicator {
         position: absolute;
         width: 100%;
         height: 100%;
+      }
+      #loading-indicator {
+        display: block;
+        z-index: 3000;
+        font-family: monospace;
+        font-size: 10em;
+        text-align: center;
+        color: green;
+        overflow: hidden;
+        vertical-align: middle;
       }
       body, html {
         margin: 0;
